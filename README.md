@@ -1,6 +1,8 @@
 # PangPangGame
 A Strategy Game by two players. Its UI is command window.
 
+Run the main.py to play.
+
 
 This is a Strategy Game by two players. Each player makes one move simultaneously in every round.
 
