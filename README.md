@@ -78,7 +78,7 @@ A possible output would be
 Out of 10000 game(s): 
 Player 1 won 5216 game(s) (52.16%)
 Player 2 won 4784 game(s) (47.84%)
-Draw 0 game(s) (0.000000)
+Draw 0 game(s) (0.00%)
 ```
 
 But it's far from enough to win against human players.

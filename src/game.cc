@@ -39,6 +39,7 @@ bool is_action_valid(Action a, const Player &p, char *expl)
         else
         {
             sprintf(expl, "already reflected");
+            return false;
         }
     }
     case Action::Attack1:
@@ -87,9 +88,28 @@ void process_action(Player &p, Action a)
     }
 }
 
-void process_KO(Action a_self, Action a_enemy, Player &enemy)
+void process_KO(Player &self, Action a_self, Action a_enemy, Player &enemy)
 {
-    if (is_action_attack(a_self))
+    if (is_action_attack(a_self) && is_action_attack(a_enemy))
+    {
+        if (a_self < a_enemy)
+        {
+            self.qi = -1;
+        }
+        else if (a_self > a_enemy)
+        {
+            enemy.qi = -1;
+        }
+        else
+        {
+            if (a_self == Action::Attack5)
+            {
+                self.qi = -1;
+                enemy.qi = -1;
+            }
+        }
+    }
+    else if (is_action_attack(a_self))
     {
         if (a_enemy == Action::Absorb)
         {
@@ -99,18 +119,22 @@ void process_KO(Action a_self, Action a_enemy, Player &enemy)
         {
             enemy.qi = -1;
         }
-        else if (a_enemy == Action::Reflect && a_self >= Action::Attack5)
+        else if (a_enemy == Action::Reflect && a_self < Action::Attack5)
         {
-            enemy.qi = -1;
-        }
-        else if (is_action_attack(a_enemy) && a_self > a_enemy)
-        {
-            enemy.qi = -1;
+            self.qi = -1;
         }
     }
-    else if (a_self == Action::Reflect)
+    else if (is_action_attack(a_enemy))
     {
-        if (is_action_attack(a_enemy) && a_enemy < Action::Attack5)
+        if (a_self == Action::Absorb)
+        {
+            self.qi = -1;
+        }
+        else if (a_self == Action::Defend && a_enemy >= Action::Attack3)
+        {
+            self.qi = -1;
+        }
+        else if (a_self == Action::Reflect && a_enemy < Action::Attack5)
         {
             enemy.qi = -1;
         }
@@ -121,8 +145,7 @@ void process_round_actions(Player &p1, Action a1, Action a2, Player &p2)
 {
     process_action(p1, a1);
     process_action(p2, a2);
-    process_KO(a1, a2, p2);
-    process_KO(a2, a1, p1);
+    process_KO(p1, a1, a2, p2);
 }
 
 bool is_game_over(const Player &p1, const Player &p2)
