@@ -64,9 +64,9 @@ The `HumanStrat` simply asks the human player what to do each round via command 
 
 - `r` for *REFLECT*
 
-Two machine strategies (I chose not to use the term "AI" because it's not intelligent at all) are implemented: `MachineStart0` and `MachineStart1`. 
+Two machine strategies (I chose not to use the term "AI" because it's not intelligent at all) are implemented: `MachineStrat0` and `MachineStrat1`. 
 
-`MachineStart1` is a little bit cleverer so one would expect it beats `MachineStart0`. In fact, if you do
+`MachineStrat1` is a little bit cleverer so one would expect it beats `MachineStrat0`. In fact, if you do
 
 ```
 ./main.exe ./libMachineStrat1.dll ./libMachineStrat0.dll 10000
