@@ -2,47 +2,85 @@
 #include "strategy.h"
 
 #include <iostream>
+#include <vector>
 
-Action GetAction(const Player &self,
-                 const Player &enemy,
-                 const std::vector<Action> &self_actions,
-                 const std::vector<Action> &enemy_actions)
+class HumanStrat : public IStrategy
 {
-    Action action;
-    char input;
-    char expl[128];
-    while (true)
+public:
+    Action get_action(const Player &self, const Player &enemy) override
     {
-        // print at most last 3 rounds' actions
-        for (unsigned n = 3; n > 0; --n)
+        Action action;
+        char input;
+        char expl[128];
+        while (true)
         {
-            if (self_actions.size() >= n && enemy_actions.size() >= n)
+            // print at most last 3 rounds' actions
+            for (unsigned n = 3; n > 0; --n)
             {
-                printf("-%d round actions: %c - %c\n",
-                       n,
-                       *(self_actions.rbegin() + n - 1),
-                       *(enemy_actions.rbegin() + n - 1));
+                if (m_self_actions.size() >= n && m_enemy_actions.size() >= n)
+                {
+                    printf("-%d round actions: %c - %c\n",
+                           n,
+                           *(m_self_actions.rbegin() + n - 1),
+                           *(m_enemy_actions.rbegin() + n - 1));
+                }
+            }
+            printf("You have %d chi; enemy has %d chi\n",
+                   self.qi,
+                   enemy.qi);
+            printf("You can%s reflect; enemy can%s reflect\n",
+                   (self.can_reflect ? "" : "not"),
+                   (enemy.can_reflect ? "" : "not"));
+
+            std::cout << "Enter your action: ";
+            std::cin >> input;
+            action = Action(input);
+
+            if (is_action_valid(action, self, expl))
+            {
+                break;
+            }
+            else
+            {
+                std::cout << "invalid action: " << expl << std::endl;
             }
         }
-        printf("You have %d chi; enemy has %d chi\n",
-               self.qi,
-               enemy.qi);
-        printf("You can%s reflect; enemy can%s reflect\n",
-               (self.can_reflect ? "" : "not"),
-               (enemy.can_reflect ? "" : "not"));
+        return action;
+    }
 
-        std::cout << "Enter your action: ";
-        std::cin >> input;
-        action = Action(input);
+    void on_round_end(Action self_action, Action enemy_action) override
+    {
+        printf("You chose %c; enemy chose %c\n", self_action, enemy_action);
+        m_self_actions.push_back(self_action);
+        m_self_actions.push_back(enemy_action);
+    }
 
-        if (is_action_valid(action, self, expl))
+    void on_game_over(GameOutcome outcome) override
+    {
+        switch (outcome)
         {
+        case GameOutcome::Win:
+            std::cout << "You win!" << std::endl;
+            break;
+        case GameOutcome::Lose:
+            std::cout << "You lose!" << std::endl;
+            break;
+        case GameOutcome::Draw:
+            std::cout << "Draw" << std::endl;
+            break;
+        default:
             break;
         }
-        else
-        {
-            std::cout << "invalid action: " << expl << std::endl;
-        }
+        m_self_actions.clear();
+        m_enemy_actions.clear();
     }
-    return action;
+
+private:
+    std::vector<Action> m_self_actions;
+    std::vector<Action> m_enemy_actions;
+};
+
+IStrategy *IStrategy_new()
+{
+    return new HumanStrat();
 }

@@ -1,12 +1,15 @@
 
 #pragma once
 
-enum class Action : char
+enum class GameOutcome: char
 {
     Win = 'W',
     Lose = 'L',
     Draw = 'D',
+};
 
+enum class Action : char
+{
     Absorb = 'a',
     Defend = 'd',
     Reflect = 'r',

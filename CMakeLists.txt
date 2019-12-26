@@ -26,3 +26,7 @@ add_library(MachineStrat0 SHARED
 add_library(MachineStrat1 SHARED
     ${PROJECT_SOURCE_DIR}/strategies/MachineStrat1.cc
 )
+
+add_library(MachineStrat2 SHARED
+    ${PROJECT_SOURCE_DIR}/strategies/MachineStrat2.cc
+)

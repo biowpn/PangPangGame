@@ -18,40 +18,52 @@ It randchoice(It first, It last)
     return std::next(first, randrange(0, last - first));
 }
 
-Action GetAction(const Player &self, const Player &enemy, const std::vector<Action> &self_actions,
-                 const std::vector<Action> &enemy_actions)
+class MachineStrat : public IStrategy
 {
-    std::vector<Action> choices{Action::Absorb};
-    if (enemy.qi > 0)
+public:
+    Action get_action(const Player &self, const Player &enemy) override
     {
-        if (enemy.qi < 3)
+        std::vector<Action> choices{Action::Absorb};
+        if (enemy.qi > 0)
         {
-            choices.push_back(Action::Defend);
+            if (enemy.qi < 3)
+            {
+                choices.push_back(Action::Defend);
+            }
+            if (self.can_reflect)
+            {
+                choices.push_back(Action::Reflect);
+            }
         }
-        if (self.can_reflect)
+        if (self.qi >= 1)
         {
-            choices.push_back(Action::Reflect);
+            choices.push_back(Action::Attack1);
         }
+        if (self.qi >= 2)
+        {
+            choices.push_back(Action::Attack2);
+        }
+        if (self.qi >= 3)
+        {
+            choices.push_back(Action::Attack3);
+        }
+        if (self.qi >= 4)
+        {
+            choices.push_back(Action::Attack4);
+        }
+        if (self.qi >= 5)
+        {
+            choices.push_back(Action::Attack5);
+        }
+        return *randchoice(choices.begin(), choices.end());
     }
-    if (self.qi >= 1)
-    {
-        choices.push_back(Action::Attack1);
-    }
-    if (self.qi >= 2)
-    {
-        choices.push_back(Action::Attack2);
-    }
-    if (self.qi >= 3)
-    {
-        choices.push_back(Action::Attack3);
-    }
-    if (self.qi >= 4)
-    {
-        choices.push_back(Action::Attack4);
-    }
-    if (self.qi >= 5)
-    {
-        choices.push_back(Action::Attack5);
-    }
-    return *randchoice(choices.begin(), choices.end());
+
+    void on_round_end(Action self_action, Action enemy_action) override {}
+
+    void on_game_over(GameOutcome outcome) override {}
+};
+
+IStrategy *IStrategy_new()
+{
+    return new MachineStrat();
 }

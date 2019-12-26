@@ -37,16 +37,13 @@ For now, support Windows only.
 
 ## Usage
 
-Each strategy is a DLL, where the following extern function is implemented:
+Each strategy is a DLL, which implements an `IStrategy` interface. The most important function of which is
 
 ```
-Action GetAction(const Player &self,
-                 const Player &enemy,
-                 const std::vector<Action> &self_actions,
-                 const std::vector<Action> &enemy_actions);
+virtual Action get_action(const Player &self, const Player &enemy) = 0;
 ```
 
-Some strategies are implemented in [strategies/](strategies/).
+Some example strategies are given in [strategies/](strategies/).
 
 The executable `main.exe` takes at least two parameters, which are the paths to two strategy DLLs. The third parameter is the number of games to play, default 100.
 

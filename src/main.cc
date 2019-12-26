@@ -9,37 +9,45 @@
 /**
  * @return 1 if Player 1 wins, -1 if Player 2 wins, 0 if draw
  */
-int game_loop(Strategy_t p1_strat,
-              Strategy_t p2_strat,
-              std::vector<Action> &p1_actions,
-              std::vector<Action> &p2_actions)
+int game_loop(IStrategy *p1_strat,
+              IStrategy *p2_strat)
 {
     Player p1, p2;
     Action a1, a2;
+    bool a1_valid, a2_valid;
 
     while (!is_game_over(p1, p2))
     {
-        a1 = p1_strat(p1, p2, p1_actions, p2_actions);
-        if (!is_action_valid(a1, p1))
-        {
-            return -1;
-        }
-        p1_actions.push_back(a1);
+        a1 = p1_strat->get_action(p1, p2);
+        a2 = p2_strat->get_action(p2, p1);
 
-        a2 = p2_strat(p2, p1, p2_actions, p1_actions);
-        if (!is_action_valid(a2, p2))
+        a1_valid = is_action_valid(a1, p1);
+        a2_valid = is_action_valid(a2, p2);
+
+        if (a1_valid && a2_valid)
+        {
+            p1_strat->on_round_end(a1, a2);
+            p2_strat->on_round_end(a2, a1);
+            process_round_actions(p1, a1, a2, p2);
+        }
+        else if (a1_valid)
         {
             return 1;
         }
-        p2_actions.push_back(a2);
-
-        process_round_actions(p1, a1, a2, p2);
+        else if (a2_valid)
+        {
+            return -1;
+        }
+        else
+        {
+            return 0;
+        }
     }
 
     return (p2.qi < 0) - (p1.qi < 0);
 }
 
-Strategy_t LoadStrategy(const char *lpath)
+IStrategy *LoadStrategy(const char *lpath)
 {
     auto hLib = LoadLibrary(TEXT(lpath));
     if (hLib == NULL)
@@ -48,14 +56,16 @@ Strategy_t LoadStrategy(const char *lpath)
         exit(-1);
     }
 
-    auto hFunc = (Strategy_t)GetProcAddress(hLib, "GetAction");
+    typedef IStrategy *(*IStrategy_new_t)();
+
+    auto hFunc = (IStrategy_new_t)GetProcAddress(hLib, "IStrategy_new");
     if (hFunc == NULL)
     {
-        std::cerr << "failed to load symbol 'GetAction' from " << lpath << std::endl;
+        std::cerr << "failed to load symbol 'IStrategy_new' from " << lpath << std::endl;
         exit(-1);
     }
 
-    return hFunc;
+    return hFunc();
 }
 
 int main(int argc, char **argv)
@@ -82,24 +92,24 @@ int main(int argc, char **argv)
 
     for (unsigned i = 0; i < num_games; ++i)
     {
-        int outcome = game_loop(p1_strat, p2_strat, p1_actions, p2_actions);
+        int outcome = game_loop(p1_strat, p2_strat);
         if (outcome > 0)
         {
             ++p1_wins;
-            p1_actions.push_back(Action::Win);
-            p2_actions.push_back(Action::Lose);
+            p1_strat->on_game_over(GameOutcome::Win);
+            p2_strat->on_game_over(GameOutcome::Lose);
         }
         else if (outcome < 0)
         {
             ++p2_wins;
-            p1_actions.push_back(Action::Lose);
-            p2_actions.push_back(Action::Win);
+            p1_strat->on_game_over(GameOutcome::Lose);
+            p2_strat->on_game_over(GameOutcome::Win);
         }
         else
         {
             ++draws;
-            p1_actions.push_back(Action::Draw);
-            p2_actions.push_back(Action::Draw);
+            p1_strat->on_game_over(GameOutcome::Draw);
+            p2_strat->on_game_over(GameOutcome::Draw);
         }
     }
 
