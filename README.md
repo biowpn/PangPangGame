@@ -4,16 +4,15 @@ A two-player round-based game. Each player makes a move simultaneously in every 
 
 ## Rules
 
-
 There are four types of moves: *ABSORB*, *ATTACK*, *DEFEND*, and *REFLECT*.
 
-- *ABSORB*: gain one unit of Qi (mysterious energy).
+- *ABSORB*: gain one unit of Qi (mysterious energy). Each player's total units of qi is capped at 5.
 
 - *ATTACK*: consume Qi to attack. Level *N* attack consumes *N* unit(s) of Qi, where *N* is an integer in [1, 5]. *N* must also be no more than the unit(s) of Qi you have.
 
 - *DEFEND*: Defuse level 1 and level 2 attacks. Has no effect on level 3+ attacks.
 
-- *REFLECT*: Reflect the opponent's attack to himself. Has no effect on level 5 attack. A player can only reflect once in a game.
+- *REFLECT*: Reflect the opponent's attack to himself. Has no effect on level 5 attack. Each player can only reflect once in a game.
 
 Further:
 
@@ -37,7 +36,7 @@ For now, support Windows only.
 
 ## Usage
 
-Each strategy is a DLL, which implements an `IStrategy` interface. The most important function of which is
+Strategy is the form of DLL, which implements an `IStrategy` interface. The most important function of which is
 
 ```
 virtual Action get_action(const Player &self, const Player &enemy) = 0;

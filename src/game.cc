@@ -76,7 +76,10 @@ void process_action(Player &p, Action a)
 {
     if (a == Action::Absorb)
     {
-        p.qi += 1;
+        if (p.qi < 5)
+        {
+            p.qi += 1;
+        }
     }
     else if (is_action_attack(a))
     {
